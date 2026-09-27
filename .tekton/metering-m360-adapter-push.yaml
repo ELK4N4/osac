@@ -25,7 +25,10 @@ spec:
   - name: output-image
     value: quay.io/redhat-user-workloads/osac-tenant/metering-m360-adapter:{{revision}}
   - name: dockerfile
-    value: adapters/Containerfile.m360-adapter
+    value: adapters/Containerfile
+  - name: build-args
+    value:
+      - ADAPTER_NAME=m360-adapter
   - name: path-context
     value: osac-metering
   pipelineSpec:

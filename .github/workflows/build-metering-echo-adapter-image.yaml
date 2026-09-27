@@ -57,10 +57,12 @@ jobs:
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc  # v7
         with:
           context: osac-metering
-          file: osac-metering/adapters/Containerfile.echo-adapter
+          file: osac-metering/adapters/Containerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            ADAPTER_NAME=echo-adapter
 
   # Signing gets its own job, granted id-token: write only here, rather than
   # on `build` -- `build` also runs (build-only, no push) on pull_request

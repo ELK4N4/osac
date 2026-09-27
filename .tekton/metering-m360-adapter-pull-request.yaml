@@ -28,7 +28,10 @@ spec:
   - name: image-expires-after
     value: 5d
   - name: dockerfile
-    value: adapters/Containerfile.m360-adapter
+    value: adapters/Containerfile
+  - name: build-args
+    value:
+      - ADAPTER_NAME=m360-adapter
   - name: path-context
     value: osac-metering
   pipelineSpec:
