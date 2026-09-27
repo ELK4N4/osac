@@ -315,8 +315,8 @@ var _ = Describe("SecurityGroups server", func() {
 			Expect(proto.Equal(createResponse.GetObject(), getResponse.GetObject())).To(BeTrue())
 		})
 
-		It("Canonicalizes non-canonical rule CIDRs on Create", func() {
-			response, err := server.Create(ctx, publicv1.SecurityGroupsCreateRequest_builder{
+		It("Rejects non-canonical rule CIDRs on Create", func() {
+			_, err := server.Create(ctx, publicv1.SecurityGroupsCreateRequest_builder{
 				Object: publicv1.SecurityGroup_builder{
 					Metadata: publicv1.Metadata_builder{
 						Name: fmt.Sprintf("test-%s", uuid.NewString()[:8]),
@@ -340,8 +340,8 @@ var _ = Describe("SecurityGroups server", func() {
 					}.Build(),
 				}.Build(),
 			}.Build())
-			Expect(err).ToNot(HaveOccurred())
-			Expect(response.GetObject().GetSpec().GetIngress()[0].GetIpv4Cidr()).To(Equal("10.0.1.0/24"))
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("canonical"))
 		})
 
 		It("Delete object", func() {
@@ -411,6 +411,33 @@ var _ = Describe("SecurityGroups server", func() {
 			Expect(status.Code()).To(Equal(grpccodes.FailedPrecondition))
 			Expect(err.Error()).To(ContainSubstring("default"))
 			Expect(err.Error()).To(ContainSubstring("system-managed"))
+		})
+	})
+
+	Describe("Tenant isolation", func() {
+		var privateServer *PrivateSecurityGroupsServer
+
+		BeforeEach(func() {
+			var err error
+			privateServer, err = NewPrivateSecurityGroupsServer().
+				SetLogger(logger).
+				SetAttributionLogic(attribution).
+				SetTenancyLogic(tenancy).
+				Build()
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("rejects security group with different tenant than parent VirtualNetwork", func() {
+			securityGroup := privatev1.SecurityGroup_builder{
+				Metadata: privatev1.Metadata_builder{Tenant: "different-tenant"}.Build(),
+				Spec: privatev1.SecurityGroupSpec_builder{
+					VirtualNetwork: privatev1.VirtualNetworkLocalReference_builder{Id: virtualNetworkID}.Build(),
+				}.Build(),
+			}.Build()
+
+			err := privateServer.validateSecurityGroup(ctx, securityGroup, nil)
+			Expect(grpcstatus.Code(err)).To(Equal(grpccodes.InvalidArgument))
+			Expect(err).To(MatchError(ContainSubstring("belongs to tenant")))
 		})
 	})
 })
