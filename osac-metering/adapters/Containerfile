@@ -1,7 +1,7 @@
 FROM registry.access.redhat.com/ubi10/go-toolset:1.26.7-1788946935 AS builder
 ARG TARGETOS
 ARG TARGETARCH
-ARG ADAPTER_NAME=echo-adapter
+ARG ADAPTER_NAME
 
 WORKDIR /opt/app-root/src
 COPY --chown=1001:0 schema/ schema/
