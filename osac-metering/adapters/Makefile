@@ -36,20 +36,18 @@ test:
 lint: golangci-lint
 	$(GOLANGCI_LINT) run ./...
 
-# Context is `..` (osac-metering/), not `.` -- the shared Containerfile
+# Context is `..` (osac-metering/), not `.` -- both adapter Containerfiles
 # also COPY the sibling schema/ directory, which only exists one level up
 # from adapters/ (matches build-metering-{m360,echo}-adapter-image.yaml's
-# `context: osac-metering`, `file: osac-metering/adapters/Containerfile`).
+# `context: osac-metering`, `file: osac-metering/adapters/Containerfile.*`).
 image-build-m360-adapter:
-	$(CONTAINER_TOOL) build -t $(IMG_M360_ADAPTER) -f Containerfile \
-		--build-arg ADAPTER_NAME=m360-adapter ..
+	$(CONTAINER_TOOL) build -t $(IMG_M360_ADAPTER) -f Containerfile.m360-adapter ..
 
 image-push-m360-adapter:
 	$(CONTAINER_TOOL) push $(IMG_M360_ADAPTER)
 
 image-build-echo-adapter:
-	$(CONTAINER_TOOL) build -t $(IMG_ECHO_ADAPTER) -f Containerfile \
-		--build-arg ADAPTER_NAME=echo-adapter ..
+	$(CONTAINER_TOOL) build -t $(IMG_ECHO_ADAPTER) -f Containerfile.echo-adapter ..
 
 image-push-echo-adapter:
 	$(CONTAINER_TOOL) push $(IMG_ECHO_ADAPTER)
