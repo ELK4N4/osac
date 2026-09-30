@@ -9,7 +9,7 @@ in compliance with the License. You may obtain a copy of the License at
 
 // echo-adapter is a test binary that consumes metering events from Kafka
 // and exposes them via an HTTP query API for E2E test assertions. It
-// exercises the full adapters.Runner lifecycle (dedup, out-of-order
+// exercises the full internal/runner.Runner lifecycle (dedup, out-of-order
 // detection, retry, flush, offset commit) without connecting to a real
 // metering provider.
 //

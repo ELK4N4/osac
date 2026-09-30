@@ -20,7 +20,7 @@ import (
 	"github.com/xdg-go/scram"
 )
 
-// KafkaConfig configures the Kafka consumer connection.
+// KafkaConfig configures TLS and SASL for Kafka consumer and producer connections.
 type KafkaConfig struct {
 	TLSEnabled   bool   // Enable TLS for broker connections
 	TLSCACert    string // Path to CA certificate file (empty = system CAs)
@@ -110,6 +110,7 @@ func (c *adapterScramClient) Done() bool {
 	return c.conversation.Done()
 }
 
+// NewProducerConfig creates a Sarama config for the adapter producer.
 func NewProducerConfig(cfg KafkaConfig) (*sarama.Config, error) {
 	sc := sarama.NewConfig()
 	sc.Version = sarama.V3_9_0_0
@@ -131,6 +132,7 @@ func NewProducerConfig(cfg KafkaConfig) (*sarama.Config, error) {
 	return sc, nil
 }
 
+// SplitAndTrimBrokers splits s on sep and drops empty or whitespace-only entries.
 func SplitAndTrimBrokers(s, sep string) []string {
 	parts := strings.Split(s, sep)
 	result := parts[:0]
